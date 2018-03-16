@@ -1,15 +1,10 @@
 import kuromoji from "kuromoji";
 
-var isNode = function () {
-    try { return this === global; } catch (e) { return false; }
-};
-
 function Analyzer({ dicPath } = {}) {
     this._analyzer = null;
 
     if (!dicPath) {
-        if (isNode) this._dicPath = require.resolve('kuromoji').replace(/src(?!.*src).*/, 'dict/');
-        else this._dicPath = 'bower_components/kuroshiro-analyzer-kuromoji/dict/';
+        this._dicPath = require.resolve('kuromoji').replace(/src(?!.*src).*/, 'dict/');
     } else {
         this._dicPath = dicPath;
     }
