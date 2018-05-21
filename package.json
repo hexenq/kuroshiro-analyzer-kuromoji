@@ -2,9 +2,15 @@
     "name": "kuroshiro-analyzer-kuromoji",
     "version": "0.1.0",
     "description": "kuromoji morphological analyzer for kuroshiro",
-    "main": "src/index.js",
+    "main": "lib/index.js",
+    "module": "src/index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "clean": "rimraf lib dist",
+        "build": "npm run build:cjs && npm run build:umd && npm run build:umd:min",
+        "build:cjs": "cross-env BABEL_ENV=cjs babel src --out-dir lib",
+        "build:umd": "cross-env BABEL_ENV=umd NODE_ENV=development browserify src/index.js -s KuromojiAnalyzer -o dist/KuromojiAnalyzer.js -t [ babelify ]",
+        "build:umd:min": "cross-env BABEL_ENV=umd NODE_ENV=production browserify src/index.js -s KuromojiAnalyzer -g uglifyify -o dist/KuromojiAnalyzer.min.js -t [ babelify ]"
     },
     "keywords": [
         "kuroshiro",
@@ -17,7 +23,21 @@
         "kuromoji": "^0.1.1"
     },
     "devDependencies": {
+        "babel-cli": "^6.26.0",
         "babel-core": "^6.26.0",
-        "babel-preset-env": "^1.6.1"
+        "babel-plugin-add-module-exports": "^0.2.1",
+        "babel-plugin-transform-runtime": "^6.23.0",
+        "babel-preset-env": "^1.6.1",
+        "babelify": "^8.0.0",
+        "browserify": "^16.2.2",
+        "cross-env": "^5.1.5",
+        "uglifyify": "^5.0.0"
+    },
+    "browserify": {
+        "transform": [
+            [
+                "babelify"
+            ]
+        ]
     }
 }

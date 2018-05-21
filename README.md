@@ -1,2 +1,2 @@
 # kuroshiro-analyzer-kuromoji
-for nodejs
+for nodejs and browser
