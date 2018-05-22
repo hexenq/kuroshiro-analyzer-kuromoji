@@ -1,4 +1,19 @@
 {
+    "presets": [
+        "env"
+    ],
+    "plugins": [
+        "add-module-exports",
+        [
+            "transform-runtime",
+            {
+                "helpers": false,
+                "polyfill": false,
+                "regenerator": true,
+                "moduleName": "babel-runtime"
+            }
+        ]
+    ],
     "env": {
         "cjs": {
             "presets": [
@@ -63,6 +78,30 @@
                                 "not ie 11",
                                 "not op_mini all"
                             ]
+                        }
+                    }
+                ]
+            ],
+            "plugins": [
+                "add-module-exports",
+                [
+                    "transform-runtime",
+                    {
+                        "helpers": false,
+                        "polyfill": false,
+                        "regenerator": true,
+                        "moduleName": "babel-runtime"
+                    }
+                ]
+            ]
+        },
+        "test": {
+            "presets": [
+                [
+                    "env",
+                    {
+                        "targets": {
+                            "node": "6"
                         }
                     }
                 ]

@@ -5,7 +5,11 @@
     "main": "lib/index.js",
     "module": "src/index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "lint": "eslint src test",
+        "lint-fix": "eslint --fix src test --ext .js",
+        "jest": "jest",
+        "jest:watch": "npm run jest -- --watch",
+        "test": "npm run lint && npm run jest",
         "clean": "rimraf lib dist",
         "build": "npm run build:cjs && npm run build:umd && npm run build:umd:min",
         "build:cjs": "cross-env BABEL_ENV=cjs babel src --out-dir lib",
@@ -25,12 +29,18 @@
     "devDependencies": {
         "babel-cli": "^6.26.0",
         "babel-core": "^6.26.0",
+        "babel-eslint": "^8.2.3",
+        "babel-jest": "^22.4.4",
         "babel-plugin-add-module-exports": "^0.2.1",
         "babel-plugin-transform-runtime": "^6.23.0",
         "babel-preset-env": "^1.6.1",
         "babelify": "^8.0.0",
         "browserify": "^16.2.2",
         "cross-env": "^5.1.5",
+        "eslint": "^4.19.1",
+        "eslint-config-airbnb-base": "^12.1.0",
+        "eslint-plugin-import": "^2.12.0",
+        "jest": "^22.4.4",
         "uglifyify": "^5.0.0"
     },
     "browserify": {
@@ -39,5 +49,12 @@
                 "babelify"
             ]
         ]
+    },
+    "jest": {
+        "testEnvironment": "node",
+        "transform": {
+            "^.+\\.jsx?$": "babel-jest"
+        },
+        "testRegex": "(/test/.*|(\\.|/)(test|spec))\\.jsx?$"
     }
 }
