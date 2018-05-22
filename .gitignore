@@ -31,3 +31,4 @@ package-lock.json
 *.map
 docs
 tmp
+!**/.gitkeep
