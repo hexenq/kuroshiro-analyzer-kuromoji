@@ -1,6 +1,6 @@
 {
     "name": "kuroshiro-analyzer-kuromoji",
-    "version": "0.1.0",
+    "version": "0.5.0",
     "description": "kuromoji morphological analyzer for kuroshiro",
     "main": "lib/index.js",
     "module": "src/index.js",
@@ -9,6 +9,7 @@
         "lint-fix": "eslint --fix src test --ext .js",
         "jest": "jest",
         "jest:watch": "npm run jest -- --watch",
+        "jest:coverage": "jest --coverage",
         "test": "npm run lint && npm run jest",
         "clean": "rimraf lib dist",
         "build": "npm run build:cjs && npm run build:umd && npm run build:umd:min",
@@ -36,6 +37,7 @@
         "babel-preset-env": "^1.6.1",
         "babelify": "^8.0.0",
         "browserify": "^16.2.2",
+        "coveralls": "^3.0.1",
         "cross-env": "^5.1.5",
         "eslint": "^4.19.1",
         "eslint-config-airbnb-base": "^12.1.0",

@@ -1,4 +1,3 @@
-// import "babel-polyfill";
 import Analyzer from '../src';
 
 describe('kuroshiro-analyzer-kuromoji Test', () => {
@@ -14,6 +13,7 @@ describe('kuroshiro-analyzer-kuromoji Test', () => {
         const ori = EXAMPLE_TEXT;
         analyzer.parse(ori)
             .then((result) => {
+                // console.debug(result);
                 expect(result).toBeInstanceOf(Array);
                 expect(result).toHaveLength(4);
                 done();

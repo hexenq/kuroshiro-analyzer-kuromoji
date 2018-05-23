@@ -1,7 +1,8 @@
 {
     "parser": "babel-eslint",
     "rules": {
-       "max-len": 0,
+      "max-len": 0,
+      "no-plusplus": 0,
       "comma-dangle": ["error", "never"],
       "brace-style": ["error", "stroustrup"],
       "no-console": 0,
