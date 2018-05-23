@@ -1,8 +1,8 @@
 # kuroshiro-analyzer-kuromoji
  
-[![Build Status](https://travis-ci.com/hexenq/kuroshiro-analyzer-seed.svg?branch=master)](https://travis-ci.org/hexenq/kuroshiro-analyzer-seed)
-[![Coverage Status](https://coveralls.io/repos/hexenq/kuroshiro-analyzer-seed/badge.svg)](https://coveralls.io/r/hexenq/kuroshiro-analyzer-seed)
-<!-- [![npm version](https://badge.fury.io/js/kuroshiro-analyzer-seed.svg)](http://badge.fury.io/js/kuroshiro-analyzer-seed)) -->
+[![Build Status](https://travis-ci.com/hexenq/kuroshiro-analyzer-kuromoji.svg?branch=master)](https://travis-ci.org/hexenq/kuroshiro-analyzer-kuromoji)
+[![Coverage Status](https://coveralls.io/repos/hexenq/kuroshiro-analyzer-kuromoji/badge.svg)](https://coveralls.io/r/hexenq/kuroshiro-analyzer-kuromoji)
+<!-- [![npm version](https://badge.fury.io/js/kuroshiro-analyzer-kuromoji.svg)](http://badge.fury.io/js/kuroshiro-analyzer-kuromoji)) -->
 
 <table>
     <tr>
