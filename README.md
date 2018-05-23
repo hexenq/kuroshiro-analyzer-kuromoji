@@ -16,10 +16,10 @@
     <tr>
         <td rowspan=2>Compatibility</td>
         <td>Node</td>
-        <td>✔ (>=6)</td>
+        <td>✓ (>=6)</td>
     </tr>
     <tr>
         <td>Browser</td>
-        <td>✔</td>
+        <td>✓</td>
     </tr>
 </table>
