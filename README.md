@@ -1,7 +1,7 @@
 # kuroshiro-analyzer-kuromoji
  
 [![Build Status](https://travis-ci.com/hexenq/kuroshiro-analyzer-kuromoji.svg?branch=master)](https://travis-ci.org/hexenq/kuroshiro-analyzer-kuromoji)
-[![Coverage Status](https://coveralls.io/repos/hexenq/kuroshiro-analyzer-kuromoji/badge.svg)](https://coveralls.io/r/hexenq/kuroshiro-analyzer-kuromoji)
+[![Coverage Status](https://coveralls.io/repos/github/hexenq/kuroshiro-analyzer-kuromoji/badge.svg?branch=master)](https://coveralls.io/github/hexenq/kuroshiro-analyzer-kuromoji?branch=master)
 <!-- [![npm version](https://badge.fury.io/js/kuroshiro-analyzer-kuromoji.svg)](http://badge.fury.io/js/kuroshiro-analyzer-kuromoji)) -->
 
 <table>
