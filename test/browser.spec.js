@@ -13,7 +13,7 @@ describe("kuroshiro-analyzer-kuromoji Browser Test", () => {
         analyzer = new Analyzer();
         await analyzer.init();
     });
-    test("Parse Sentence", (done) => {
+    it("Parse Sentence", (done) => {
         const ori = EXAMPLE_TEXT;
         analyzer.parse(ori)
             .then((result) => {

@@ -77,7 +77,6 @@ class Analyzer {
         return new Promise((resolve, reject) => {
             if (str.trim() === "") return resolve([]);
             const result = this._analyzer.tokenize(str);
-            if (!(result instanceof Array)) return resolve([]);
             for (let i = 0; i < result.length; i++) {
                 result[i].verbose = {};
                 result[i].verbose.word_id = result[i].word_id;

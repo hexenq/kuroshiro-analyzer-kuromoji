@@ -9,7 +9,7 @@ describe("kuroshiro-analyzer-kuromoji Node Test", () => {
 
     let analyzer;
 
-    test("Initialization", async (done) => {
+    it("Initialization", async (done) => {
         analyzer = new Analyzer({
             dicPath: "node_modules/kuromoji/dict/"
         });
@@ -17,7 +17,7 @@ describe("kuroshiro-analyzer-kuromoji Node Test", () => {
         done();
     });
 
-    test("Repeated Initialization", async (done) => {
+    it("Repeated Initialization", async (done) => {
         analyzer = new Analyzer({
             dicPath: "node_modules/kuromoji/dict/"
         });
@@ -31,7 +31,7 @@ describe("kuroshiro-analyzer-kuromoji Node Test", () => {
         }
     });
 
-    test("Kuromoji Build Failed", async (done) => {
+    it("Kuromoji Build Failed", async (done) => {
         analyzer = new Analyzer({
             dicPath: "node_modules/foo/bar"
         });
@@ -44,7 +44,7 @@ describe("kuroshiro-analyzer-kuromoji Node Test", () => {
         }
     });
 
-    test("Parse Sentence", async (done) => {
+    it("Parse Sentence", async (done) => {
         analyzer = new Analyzer();
         await analyzer.init();
 
@@ -61,7 +61,23 @@ describe("kuroshiro-analyzer-kuromoji Node Test", () => {
             });
     });
 
-    test("Parse Blank Sentence", async (done) => {
+    it("Parse Null", async (done) => {
+        analyzer = new Analyzer();
+        await analyzer.init();
+
+        analyzer.parse()
+            .then((result) => {
+                // console.debug(result);
+                expect(result).toBeInstanceOf(Array);
+                expect(result).toHaveLength(0);
+                done();
+            })
+            .catch((err) => {
+                done(err);
+            });
+    });
+
+    it("Parse Blank Sentence", async (done) => {
         analyzer = new Analyzer();
         await analyzer.init();
 
