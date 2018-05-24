@@ -55,7 +55,7 @@ class Analyzer {
      * @param {string} str input string
      * @returns {Promise} Promise object represents the result of parsing
      * @example The result of parsing
-     * {
+     * [{
      *     "surface_form": "黒白",    // 表層形
      *     "pos": "名詞",               // 品詞 (part of speech)
      *     "pos_detail_1": "一般",      // 品詞細分類1
@@ -71,7 +71,7 @@ class Analyzer {
      *         "word_type": "KNOWN",
      *         "word_position": 1
      *     }
-     * }
+     * }]
      */
     parse(str = "") {
         return new Promise((resolve, reject) => {
