@@ -9,7 +9,7 @@
       "padded-blocks": 0,
       "indent": ["error", 4, {"SwitchCase": 1}],
       "spaced-comment": 1,
-      "quotes": ["error", "single", { "allowTemplateLiterals": true }],
+      "quotes": ["error", "double", { "allowTemplateLiterals": true }],
       "import/prefer-default-export": "off",
       "consistent-return": 0,
       "no-useless-escape": 0,

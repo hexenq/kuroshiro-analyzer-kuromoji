@@ -1,9 +1,9 @@
-import kuromoji from 'kuromoji';
+import kuromoji from "kuromoji";
 
 // Check where we are
 let isNode = false;
-const isBrowser = (typeof window !== 'undefined');
-if (!isBrowser && typeof module !== 'undefined' && module.exports) {
+const isBrowser = (typeof window !== "undefined");
+if (!isBrowser && typeof module !== "undefined" && module.exports) {
     isNode = true;
 }
 
@@ -20,8 +20,8 @@ class Analyzer {
         this._analyzer = null;
 
         if (!dicPath) {
-            if (isNode) this._dicPath = require.resolve('kuromoji').replace(/src(?!.*src).*/, 'dict/');
-            else this._dicPath = '/node_modules/kuromoji/dict/';
+            if (isNode) this._dicPath = require.resolve("kuromoji").replace(/src(?!.*src).*/, "dict/");
+            else this._dicPath = "node_modules/kuromoji/dict/";
         }
         else {
             this._dicPath = dicPath;
@@ -45,7 +45,7 @@ class Analyzer {
                 });
             }
             else {
-                reject(new Error('This analyzer has already been initialized.'));
+                reject(new Error("This analyzer has already been initialized."));
             }
         });
     }
@@ -73,9 +73,9 @@ class Analyzer {
      *     }
      * }
      */
-    parse(str = '') {
+    parse(str = "") {
         return new Promise((resolve, reject) => {
-            if (str.trim() === '') return resolve([]);
+            if (str.trim() === "") return resolve([]);
             const result = this._analyzer.tokenize(str);
             if (!(result instanceof Array)) return resolve([]);
             for (let i = 0; i < result.length; i++) {

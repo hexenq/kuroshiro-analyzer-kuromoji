@@ -6,10 +6,10 @@
     "module": "src/index.js",
     "scripts": {
         "lint": "eslint src test",
-        "lint-fix": "eslint --fix src test --ext .js",
-        "jest": "jest",
+        "lint:fix": "eslint --fix src test --ext .js",
+        "jest": "jest --verbose",
         "jest:watch": "npm run jest -- --watch",
-        "jest:coverage": "jest --coverage",
+        "jest:coverage": "jest --verbose --coverage",
         "test": "npm run lint && npm run jest",
         "clean": "rimraf lib dist",
         "build": "npm run build:cjs && npm run build:umd && npm run build:umd:min",
@@ -22,8 +22,16 @@
         "analyzer",
         "kuromoji"
     ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/hexenq/kuroshiro-analyzer-kuromoji.git"
+    },
     "author": "Hexen Qi",
     "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/hexenq/kuroshiro-analyzer-kuromoji/issues"
+    },
+    "homepage": "https://github.com/hexenq/kuroshiro-analyzer-kuromoji",
     "dependencies": {
         "kuromoji": "^0.1.1"
     },
@@ -53,7 +61,6 @@
         ]
     },
     "jest": {
-        "testEnvironment": "node",
         "transform": {
             "^.+\\.jsx?$": "babel-jest"
         },
