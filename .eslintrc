@@ -14,7 +14,13 @@
       "consistent-return": 0,
       "no-useless-escape": 0,
       "no-underscore-dangle": 0,
-      "no-unused-vars": 0
+      "no-unused-vars": 0,
+      "no-param-reassign": 0,
+      "no-case-declarations": 0,
+      "prefer-destructuring": 0,
+      "func-names": 0,
+      "camelcase": 0,
+      "no-cond-assign": 0
     },
     "extends": "airbnb-base",
     "env": {
