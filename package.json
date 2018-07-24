@@ -19,8 +19,15 @@
     },
     "keywords": [
         "kuroshiro",
+        "morphology",
         "analyzer",
-        "kuromoji"
+        "kuromoji",
+        "japanese",
+        "language",
+        "kanji",
+        "hiragana",
+        "katakana",
+        "romaji"
     ],
     "repository": {
         "type": "git",
