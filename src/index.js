@@ -36,7 +36,7 @@ class Analyzer {
         return new Promise((resolve, reject) => {
             const self = this;
             if (this._analyzer == null) {
-                kuromoji.builder({ dictPath: this._dictPath }).build((err, newAnalyzer) => {
+                kuromoji.builder({ dicPath: this._dictPath }).build((err, newAnalyzer) => {
                     if (err) {
                         return reject(err);
                     }
