@@ -14,17 +14,17 @@ class Analyzer {
     /**
      * Constructor
      * @param {Object} [options] JSON object which have key-value pairs settings
-     * @param {string} [options.dicPath] Path of the dictionaries
+     * @param {string} [options.dictPath] Path of the dictionaries
      */
-    constructor({ dicPath } = {}) {
+    constructor({ dictPath } = {}) {
         this._analyzer = null;
 
-        if (!dicPath) {
-            if (isNode) this._dicPath = require.resolve("kuromoji").replace(/src(?!.*src).*/, "dict/");
-            else this._dicPath = "node_modules/kuromoji/dict/";
+        if (!dictPath) {
+            if (isNode) this._dictPath = require.resolve("kuromoji").replace(/src(?!.*src).*/, "dict/");
+            else this._dictPath = "node_modules/kuromoji/dict/";
         }
         else {
-            this._dicPath = dicPath;
+            this._dictPath = dictPath;
         }
     }
 
@@ -36,7 +36,7 @@ class Analyzer {
         return new Promise((resolve, reject) => {
             const self = this;
             if (this._analyzer == null) {
-                kuromoji.builder({ dicPath: this._dicPath }).build((err, newAnalyzer) => {
+                kuromoji.builder({ dictPath: this._dictPath }).build((err, newAnalyzer) => {
                     if (err) {
                         return reject(err);
                     }

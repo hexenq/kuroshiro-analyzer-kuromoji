@@ -11,7 +11,7 @@ describe("kuroshiro-analyzer-kuromoji Node Test", () => {
 
     it("Initialization", async (done) => {
         analyzer = new Analyzer({
-            dicPath: "node_modules/kuromoji/dict/"
+            dictPath: "node_modules/kuromoji/dict/"
         });
         await analyzer.init();
         done();
@@ -19,7 +19,7 @@ describe("kuroshiro-analyzer-kuromoji Node Test", () => {
 
     it("Repeated Initialization", async (done) => {
         analyzer = new Analyzer({
-            dicPath: "node_modules/kuromoji/dict/"
+            dictPath: "node_modules/kuromoji/dict/"
         });
         try {
             await analyzer.init();
@@ -33,7 +33,7 @@ describe("kuroshiro-analyzer-kuromoji Node Test", () => {
 
     it("Kuromoji Build Failed", async (done) => {
         analyzer = new Analyzer({
-            dicPath: "node_modules/foo/bar"
+            dictPath: "node_modules/foo/bar"
         });
         try {
             await analyzer.init();
