@@ -14,7 +14,7 @@ class Analyzer {
     /**
      * Constructor
      * @param {Object} [options] JSON object which have key-value pairs settings
-     * @param {string} [options.dictPath] Path of the dictionaries
+     * @param {string} [options.dictPath] Path of the dictionary files
      */
     constructor({ dictPath } = {}) {
         this._analyzer = null;
