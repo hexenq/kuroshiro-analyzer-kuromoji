@@ -28,7 +28,7 @@
 ```sh
 $ npm install kuroshiro-analyzer-kuromoji
 ```
-*For legacy frontend workflows, you could include `dist/kuroshiro-analyzer-kuromoji.min.js` in your page. (you may first build it from source with `npm run build` after `npm install`)*
+*For legacy frontend workflows, you could include `dist/kuroshiro-analyzer-kuromoji.min.js` in your page and the exported name is `KuromojiAnalyzer`. (you may first build it from source with `npm run build` after `npm install`)*
 
 ## Usage with kuroshiro
 ### Configure analyzer
