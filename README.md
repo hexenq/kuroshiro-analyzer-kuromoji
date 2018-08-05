@@ -28,7 +28,7 @@
 ```sh
 $ npm install kuroshiro-analyzer-kuromoji
 ```
-*For legacy frontend workflows, you could include `dist/KuromojiAnalyzer.min.js` in your page.*
+*For legacy frontend workflows, you could include `dist/kuroshiro-analyzer-kuromoji.min.js` in your page. (you may first build it from source with `npm run build` after `npm install`)*
 
 ## Usage with kuroshiro
 ### Configure analyzer
@@ -45,4 +45,10 @@ await kuroshiro.init(analyzer);
 ```
 
 ### Initialization Parameters
+__Example:__
+```js
+const analyzer = new KuromojiAnalyzer({
+    dictPath: "url/to/dictionary_files"
+});
+```
 - `dictPath`: *Optional* Path of the dictionary files
