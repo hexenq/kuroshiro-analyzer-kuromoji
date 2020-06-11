@@ -13,17 +13,10 @@ describe("kuroshiro-analyzer-kuromoji Browser Test", () => {
         analyzer = new Analyzer();
         await analyzer.init();
     });
-    it("Parse Sentence", (done) => {
+    it("Parse Sentence", () => {
         const ori = EXAMPLE_TEXT;
-        analyzer.parse(ori)
-            .then((result) => {
-                // console.debug(result);
-                expect(result).toBeInstanceOf(Array);
-                expect(result).toHaveLength(4);
-                done();
-            })
-            .catch((err) => {
-                done(err);
-            });
+        const result = analyzer.parse(ori);
+        expect(result).toBeInstanceOf(Array);
+        expect(result).toHaveLength(4);
     });
 });

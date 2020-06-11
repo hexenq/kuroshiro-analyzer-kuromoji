@@ -18,6 +18,7 @@ class Analyzer {
      */
     constructor({ dictPath } = {}) {
         this._analyzer = null;
+        this._initializing = false;
 
         if (!dictPath) {
             if (isNode) this._dictPath = require.resolve("kuromoji").replace(/src(?!.*src).*/, "dict/");
@@ -53,7 +54,7 @@ class Analyzer {
     /**
      * Parse the given string
      * @param {string} str input string
-     * @returns {Promise} Promise object represents the result of parsing
+     * @returns {Array<Object>} Promise object represents the result of parsing
      * @example The result of parsing
      * [{
      *     "surface_form": "黒白",    // 表層形
@@ -74,20 +75,19 @@ class Analyzer {
      * }]
      */
     parse(str = "") {
-        return new Promise((resolve, reject) => {
-            if (str.trim() === "") return resolve([]);
-            const result = this._analyzer.tokenize(str);
-            for (let i = 0; i < result.length; i++) {
-                result[i].verbose = {};
-                result[i].verbose.word_id = result[i].word_id;
-                result[i].verbose.word_type = result[i].word_type;
-                result[i].verbose.word_position = result[i].word_position;
-                delete result[i].word_id;
-                delete result[i].word_type;
-                delete result[i].word_position;
-            }
-            resolve(result);
-        });
+        if (this._analyzer == null) throw new Error("Analyzer has not been initialized yet. Use Analyzer.init() before parsing.");
+        if (str.trim() === "") return [];
+        const result = this._analyzer.tokenize(str);
+        for (let i = 0; i < result.length; i++) {
+            result[i].verbose = {};
+            result[i].verbose.word_id = result[i].word_id;
+            result[i].verbose.word_type = result[i].word_type;
+            result[i].verbose.word_position = result[i].word_position;
+            delete result[i].word_id;
+            delete result[i].word_type;
+            delete result[i].word_position;
+        }
+        return result;
     }
 }
 
