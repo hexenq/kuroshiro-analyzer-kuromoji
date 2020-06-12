@@ -15,7 +15,7 @@ describe("kuroshiro-analyzer-kuromoji Browser Test", () => {
     });
     it("Parse Sentence", () => {
         const ori = EXAMPLE_TEXT;
-        const result = analyzer.parse(ori);
+        const result = analyzer.parseSync(ori);
         expect(result).toBeInstanceOf(Array);
         expect(result).toHaveLength(4);
     });

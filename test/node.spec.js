@@ -50,7 +50,7 @@ describe("kuroshiro-analyzer-kuromoji Node Test", () => {
 
         const ori = EXAMPLE_TEXT;
         expect(() => {
-            analyzer.parse(ori);
+            analyzer.parseSync(ori);
         }).toThrowError("Analyzer has not been initialized yet. Use Analyzer.init() before parsing.");
     });
 
@@ -59,7 +59,7 @@ describe("kuroshiro-analyzer-kuromoji Node Test", () => {
         await analyzer.init();
 
         const ori = EXAMPLE_TEXT;
-        const result = analyzer.parse(ori);
+        const result = analyzer.parseSync(ori);
         expect(result).toBeInstanceOf(Array);
         expect(result).toHaveLength(4);
     });
@@ -68,7 +68,7 @@ describe("kuroshiro-analyzer-kuromoji Node Test", () => {
         analyzer = new Analyzer();
         await analyzer.init();
 
-        const result = analyzer.parse();
+        const result = analyzer.parseSync();
         expect(result).toBeInstanceOf(Array);
         expect(result).toHaveLength(0);
     });
@@ -78,7 +78,7 @@ describe("kuroshiro-analyzer-kuromoji Node Test", () => {
         await analyzer.init();
 
         const ori = "";
-        const result = analyzer.parse(ori);
+        const result = analyzer.parseSync(ori);
         expect(result).toBeInstanceOf(Array);
         expect(result).toHaveLength(0);
     });

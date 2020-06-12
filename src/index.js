@@ -54,7 +54,7 @@ class Analyzer {
     /**
      * Parse the given string
      * @param {string} str input string
-     * @returns {Array<Object>} Promise object represents the result of parsing
+     * @returns {Array<Object>} Array of tokenized symbols represents the result of parsing
      * @example The result of parsing
      * [{
      *     "surface_form": "黒白",    // 表層形
@@ -74,7 +74,7 @@ class Analyzer {
      *     }
      * }]
      */
-    parse(str = "") {
+    parseSync(str = "") {
         if (this._analyzer == null) throw new Error("Analyzer has not been initialized yet. Use Analyzer.init() before parsing.");
         if (str.trim() === "") return [];
         const result = this._analyzer.tokenize(str);
@@ -88,6 +88,15 @@ class Analyzer {
             delete result[i].word_position;
         }
         return result;
+    }
+
+    /**
+     * Parse the given string asynchronously
+     * @param {string} str input string
+     * @returns {Promise<Array<Object>>} Promise object represents the result of parsing
+     */
+    parse(str = "") {
+        return Promise.resolve(this.parseSync(str));
     }
 }
 
