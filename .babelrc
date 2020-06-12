@@ -1,16 +1,14 @@
 {
     "presets": [
-        "env"
+        "@babel/preset-env"
     ],
     "plugins": [
         "add-module-exports",
         [
-            "transform-runtime",
+            "@babel/transform-runtime",
             {
                 "helpers": false,
-                "polyfill": false,
-                "regenerator": true,
-                "moduleName": "babel-runtime"
+                "regenerator": true
             }
         ]
     ],
@@ -18,7 +16,7 @@
         "cjs": {
             "presets": [
                 [
-                    "env",
+                    "@babel/preset-env",
                     {
                         "targets": {
                             "node": "6"
@@ -29,12 +27,10 @@
             "plugins": [
                 "add-module-exports",
                 [
-                    "transform-runtime",
+                    "@babel/transform-runtime",
                     {
                         "helpers": false,
-                        "polyfill": false,
-                        "regenerator": true,
-                        "moduleName": "babel-runtime"
+                        "regenerator": true
                     }
                 ]
             ]
@@ -42,7 +38,7 @@
         "es": {
             "presets": [
                 [
-                    "env",
+                    "@babel/preset-env",
                     {
                         "targets": {
                             "browsers": [
@@ -57,12 +53,10 @@
             ],
             "plugins": [
                 [
-                    "transform-runtime",
+                    "@babel/transform-runtime",
                     {
                         "helpers": false,
-                        "polyfill": false,
-                        "regenerator": true,
-                        "moduleName": "babel-runtime"
+                        "regenerator": true
                     }
                 ]
             ]
@@ -70,7 +64,7 @@
         "umd": {
             "presets": [
                 [
-                    "env",
+                    "@babel/preset-env",
                     {
                         "targets": {
                             "browsers": [
@@ -85,12 +79,10 @@
             "plugins": [
                 "add-module-exports",
                 [
-                    "transform-runtime",
+                    "@babel/transform-runtime",
                     {
                         "helpers": false,
-                        "polyfill": false,
-                        "regenerator": true,
-                        "moduleName": "babel-runtime"
+                        "regenerator": true
                     }
                 ]
             ]
@@ -98,7 +90,7 @@
         "test": {
             "presets": [
                 [
-                    "env",
+                    "@babel/preset-env",
                     {
                         "targets": {
                             "node": "6"
@@ -109,12 +101,10 @@
             "plugins": [
                 "add-module-exports",
                 [
-                    "transform-runtime",
+                    "@babel/transform-runtime",
                     {
                         "helpers": false,
-                        "polyfill": false,
-                        "regenerator": true,
-                        "moduleName": "babel-runtime"
+                        "regenerator": true
                     }
                 ]
             ]

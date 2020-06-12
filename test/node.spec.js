@@ -44,53 +44,65 @@ describe("kuroshiro-analyzer-kuromoji Node Test", () => {
         }
     });
 
-    it("Parse Sentence", async (done) => {
+    it("Parse Attempt Before Initialization", async () => {
+        analyzer = new Analyzer();
+        analyzer.init();
+
+        const ori = EXAMPLE_TEXT;
+        expect(() => {
+            analyzer.parseSync(ori);
+        }).toThrowError("Analyzer has not been initialized yet. Use Analyzer.init() before parsing.");
+    });
+
+    it("Parse Sentence Sync", async () => {
         analyzer = new Analyzer();
         await analyzer.init();
 
         const ori = EXAMPLE_TEXT;
-        analyzer.parse(ori)
-            .then((result) => {
-                // console.debug(result);
-                expect(result).toBeInstanceOf(Array);
-                expect(result).toHaveLength(4);
-                done();
-            })
-            .catch((err) => {
-                done(err);
-            });
+        const result = analyzer.parseSync(ori);
+        expect(result).toBeInstanceOf(Array);
+        expect(result).toHaveLength(4);
     });
 
-    it("Parse Null", async (done) => {
+    it("Parse Sentence Async", async () => {
         analyzer = new Analyzer();
         await analyzer.init();
 
-        analyzer.parse()
-            .then((result) => {
-                // console.debug(result);
-                expect(result).toBeInstanceOf(Array);
-                expect(result).toHaveLength(0);
-                done();
-            })
-            .catch((err) => {
-                done(err);
-            });
+        const ori = EXAMPLE_TEXT;
+        const result = await analyzer.parse(ori);
+        expect(result).toBeInstanceOf(Array);
+        expect(result).toHaveLength(4);
     });
 
-    it("Parse Blank Sentence", async (done) => {
+    it("Parse Empty", async () => {
+        analyzer = new Analyzer();
+        await analyzer.init();
+
+        const oriSync = analyzer.parseSync();
+        expect(oriSync).toBeInstanceOf(Array);
+        expect(oriSync).toHaveLength(0);
+
+        const oriAsync = await analyzer.parse();
+        expect(oriAsync).toBeInstanceOf(Array);
+        expect(oriAsync).toHaveLength(0);
+    });
+
+    it("Parse Null", async () => {
+        analyzer = new Analyzer();
+        await analyzer.init();
+
+        const result = analyzer.parseSync();
+        expect(result).toBeInstanceOf(Array);
+        expect(result).toHaveLength(0);
+    });
+
+    it("Parse Blank Sentence", async () => {
         analyzer = new Analyzer();
         await analyzer.init();
 
         const ori = "";
-        analyzer.parse(ori)
-            .then((result) => {
-                // console.debug(result);
-                expect(result).toBeInstanceOf(Array);
-                expect(result).toHaveLength(0);
-                done();
-            })
-            .catch((err) => {
-                done(err);
-            });
+        const result = analyzer.parseSync(ori);
+        expect(result).toBeInstanceOf(Array);
+        expect(result).toHaveLength(0);
     });
 });
