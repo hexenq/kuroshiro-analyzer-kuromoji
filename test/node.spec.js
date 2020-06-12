@@ -54,7 +54,7 @@ describe("kuroshiro-analyzer-kuromoji Node Test", () => {
         }).toThrowError("Analyzer has not been initialized yet. Use Analyzer.init() before parsing.");
     });
 
-    it("Parse Sentence", async () => {
+    it("Parse Sentence Sync", async () => {
         analyzer = new Analyzer();
         await analyzer.init();
 
@@ -62,6 +62,29 @@ describe("kuroshiro-analyzer-kuromoji Node Test", () => {
         const result = analyzer.parseSync(ori);
         expect(result).toBeInstanceOf(Array);
         expect(result).toHaveLength(4);
+    });
+
+    it("Parse Sentence Async", async () => {
+        analyzer = new Analyzer();
+        await analyzer.init();
+
+        const ori = EXAMPLE_TEXT;
+        const result = await analyzer.parse(ori);
+        expect(result).toBeInstanceOf(Array);
+        expect(result).toHaveLength(4);
+    });
+
+    it("Parse Empty", async () => {
+        analyzer = new Analyzer();
+        await analyzer.init();
+
+        const oriSync = analyzer.parseSync();
+        expect(oriSync).toBeInstanceOf(Array);
+        expect(oriSync).toHaveLength(0);
+
+        const oriAsync = await analyzer.parse();
+        expect(oriAsync).toBeInstanceOf(Array);
+        expect(oriAsync).toHaveLength(0);
     });
 
     it("Parse Null", async () => {
