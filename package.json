@@ -74,5 +74,6 @@
         },
         "testRegex": "(/test/.*|(\\.|/)(test|spec))\\.jsx?$",
         "testURL": "http://localhost"
-    }
+    },
+    "types": "./src/index.d.ts"
 }
