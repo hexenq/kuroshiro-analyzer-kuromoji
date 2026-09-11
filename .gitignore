@@ -27,7 +27,7 @@ lib/*
 
 # Others
 .DS_Store
-package-lock.json
+*.tgz
 *.map
 docs
 tmp

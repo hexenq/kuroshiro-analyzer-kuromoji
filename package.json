@@ -2,20 +2,32 @@
     "name": "kuroshiro-analyzer-kuromoji",
     "version": "1.1.0",
     "description": "kuromoji morphological analyzer for kuroshiro",
-    "main": "lib/index.js",
+    "main": "index.js",
     "module": "src/index.js",
+    "files": [
+        "index.js",
+        "lib",
+        "dist",
+        "src"
+    ],
+    "browser": {
+        "./src/dict-path.js": "./src/dict-path.browser.js",
+        "./lib/dict-path.js": "./lib/dict-path.browser.js"
+    },
     "scripts": {
-        "lint": "eslint src test",
-        "lint:fix": "eslint --fix src test --ext .js",
+        "lint": "eslint src test scripts index.js *.mjs",
+        "lint:fix": "npm run lint -- --fix",
         "jest": "jest --verbose",
         "jest:watch": "npm run jest -- --watch",
         "jest:coverage": "jest --verbose --coverage",
-        "test": "npm run lint && npm run jest",
+        "test:package": "node test/package-smoke.cjs",
+        "test": "npm run lint && npm run jest && npm run build && npm run test:package",
         "clean": "rimraf lib dist",
-        "build": "npm run build:cjs && npm run build:umd && npm run build:umd:min",
+        "build": "npm run clean && npm run build:cjs && npm run build:umd && npm run build:umd:min",
         "build:cjs": "cross-env BABEL_ENV=cjs babel src --out-dir lib",
-        "build:umd": "cross-env BABEL_ENV=umd NODE_ENV=development browserify src/index.js -s KuromojiAnalyzer -o dist/kuroshiro-analyzer-kuromoji.js -t [ babelify ]",
-        "build:umd:min": "cross-env BABEL_ENV=umd NODE_ENV=production browserify src/index.js -s KuromojiAnalyzer -g uglifyify -o dist/kuroshiro-analyzer-kuromoji.min.js -t [ babelify ]"
+        "build:umd": "vite build",
+        "build:umd:min": "vite build --mode minify",
+        "prepack": "npm run build"
     },
     "keywords": [
         "kuroshiro",
@@ -44,35 +56,29 @@
         "kuromoji": "^0.1.1"
     },
     "devDependencies": {
-        "babel-cli": "^6.26.0",
-        "babel-core": "^6.26.0",
-        "babel-eslint": "^8.2.3",
-        "babel-jest": "^22.4.4",
-        "babel-plugin-add-module-exports": "^0.2.1",
-        "babel-plugin-transform-runtime": "^6.23.0",
-        "babel-preset-env": "^1.6.1",
-        "babelify": "^8.0.0",
-        "browserify": "^16.2.2",
-        "coveralls": "^3.0.1",
-        "cross-env": "^5.1.5",
-        "eslint": "^4.19.1",
-        "eslint-config-airbnb-base": "^12.1.0",
-        "eslint-plugin-import": "^2.12.0",
-        "jest": "^22.4.4",
-        "uglifyify": "^5.0.0"
-    },
-    "browserify": {
-        "transform": [
-            [
-                "babelify"
-            ]
-        ]
+        "@babel/cli": "^7.29.7",
+        "@babel/core": "^7.29.7",
+        "@babel/preset-env": "^7.29.7",
+        "@eslint/js": "^10.0.1",
+        "acorn": "^8.18.0",
+        "babel-jest": "^30.5.1",
+        "babel-plugin-add-module-exports": "^1.0.4",
+        "cross-env": "^10.1.0",
+        "eslint": "^10.10.0",
+        "globals": "^17.12.0",
+        "jest": "^30.5.1",
+        "jsdom": "^26.1.0",
+        "path-browserify": "^1.0.1",
+        "rimraf": "^6.1.3",
+        "vite": "^8.3.0"
     },
     "jest": {
         "transform": {
             "^.+\\.jsx?$": "babel-jest"
         },
-        "testRegex": "(/test/.*|(\\.|/)(test|spec))\\.jsx?$",
-        "testURL": "http://localhost"
+        "testEnvironment": "node",
+        "testMatch": [
+            "**/test/**/*.spec.js"
+        ]
     }
 }

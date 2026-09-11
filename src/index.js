@@ -1,11 +1,5 @@
 import kuromoji from "kuromoji";
-
-// Check where we are
-let isNode = false;
-const isBrowser = (typeof window !== "undefined");
-if (!isBrowser && typeof module !== "undefined" && module.exports) {
-    isNode = true;
-}
+import defaultDictPath from "./dict-path.js";
 
 /**
  * Kuromoji based morphological analyzer for kuroshiro
@@ -20,8 +14,7 @@ class Analyzer {
         this._analyzer = null;
 
         if (!dictPath) {
-            if (isNode) this._dictPath = require.resolve("kuromoji").replace(/src(?!.*src).*/, "dict/");
-            else this._dictPath = "node_modules/kuromoji/dict/";
+            this._dictPath = defaultDictPath();
         }
         else {
             this._dictPath = dictPath;
@@ -74,7 +67,7 @@ class Analyzer {
      * }]
      */
     parse(str = "") {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             if (str.trim() === "") return resolve([]);
             const result = this._analyzer.tokenize(str);
             for (let i = 0; i < result.length; i++) {
