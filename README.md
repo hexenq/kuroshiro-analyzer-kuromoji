@@ -49,6 +49,31 @@ CommonJS is also supported:
 const KuromojiAnalyzer = require("kuroshiro-analyzer-kuromoji");
 ```
 
+### TypeScript
+
+The maintained source includes package-entry declarations for the constructor,
+options, and parsed tokens. These declarations are not included in the published
+1.1.0 release.
+
+```ts
+import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji";
+
+const options: KuromojiAnalyzer.Options = {};
+const analyzer = new KuromojiAnalyzer(options);
+await analyzer.init();
+const tokens: KuromojiAnalyzer.Token[] = await analyzer.parse("日本語");
+const readings = tokens.map(token => token.reading ?? token.surface_form);
+```
+
+Unknown words may have no `reading` or `pronunciation`. Tokenizer metadata such as
+`word_id` is available under `token.verbose`, not on the token itself.
+
+For TypeScript compiled to CommonJS, enable `esModuleInterop` for default imports,
+or use `import KuromojiAnalyzer = require("kuroshiro-analyzer-kuromoji")`.
+Native Node ESM and bundler module resolution also support the default import.
+Non-module browser scripts can reference `kuroshiro-analyzer-kuromoji` types for
+the `KuromojiAnalyzer` global; load the actual UMD script separately.
+
 ### Initialization Parameters
 __Example:__
 ```js
@@ -89,5 +114,10 @@ npm pack --dry-run
 Use `npm install <package>` or `npm uninstall <package>` when changing dependencies, and include `package-lock.json` in the change. Builds generate CommonJS files in `lib/` and standalone UMD bundles in `dist/`; `npm pack` rebuilds them automatically.
 
 The test suite covers the analyzer API, package exports, ES2015 output syntax, and real dictionary loading over HTTP in a jsdom browser environment. CI runs on Node.js 22 and 24. Legacy Node.js runtime claims should also be checked on the actual runtime before release; syntax checks alone do not prove runtime compatibility.
+
+`npm test` also checks the declarations from the packed package using TypeScript
+5.9.3 in CommonJS, native Node ESM, bundler, and browser-global consumers. It
+rejects invalid options and unsafe access to optional readings, and runs compiled
+Node consumers against the real dictionary. TypeScript is a development dependency.
 
 Keep development changes backward-compatible and leave version updates to the release process. Write commit messages in English using Conventional Commits, for example `build: modernize development tooling`.

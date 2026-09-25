@@ -4,8 +4,10 @@
     "description": "kuromoji morphological analyzer for kuroshiro",
     "main": "index.js",
     "module": "src/index.js",
+    "types": "index.d.ts",
     "files": [
         "index.js",
+        "index.d.ts",
         "lib",
         "dist",
         "src"
@@ -21,7 +23,8 @@
         "jest:watch": "npm run jest -- --watch",
         "jest:coverage": "jest --verbose --coverage",
         "test:package": "node test/package-smoke.cjs",
-        "test": "npm run lint && npm run jest && npm run build && npm run test:package",
+        "test:types": "node test/types.cjs",
+        "test": "npm run lint && npm run jest && npm run build && npm run test:package && npm run test:types",
         "clean": "rimraf lib dist",
         "build": "npm run clean && npm run build:cjs && npm run build:umd && npm run build:umd:min",
         "build:cjs": "cross-env BABEL_ENV=cjs babel src --out-dir lib",
@@ -70,6 +73,7 @@
         "jsdom": "^26.1.0",
         "path-browserify": "^1.0.1",
         "rimraf": "^6.1.3",
+        "typescript": "5.9.3",
         "vite": "^8.3.0"
     },
     "jest": {
