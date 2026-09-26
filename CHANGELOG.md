@@ -1,4 +1,5 @@
-## 2.0.0-beta.1 (Unreleased)
+<a name="2.0.0-beta.1"></a>
+## [2.0.0-beta.1](https://github.com/hexenq/kuroshiro-analyzer-kuromoji/compare/1.1.0...2.0.0-beta.1) (2026-09-26)
 
 ### Breaking Changes
 
