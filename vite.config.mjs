@@ -21,6 +21,7 @@ export default defineConfig(({ mode }) => ({
         alias: { path: require.resolve("path-browserify") }
     },
     build: {
+        // Keep library output usable beyond Vite's default browser targets.
         target: "es2015",
         license: { fileName: "THIRD_PARTY_LICENSES.md" },
         emptyOutDir: false,

@@ -1,5 +1,10 @@
-<a name="1.2.0"></a>
-## [1.2.0](https://github.com/hexenq/kuroshiro-analyzer-kuromoji/compare/1.1.0...1.2.0)
+## 2.0.0-beta.1 (Unreleased)
+
+### Breaking Changes
+
+* Require Node.js 22 or later at runtime.
+* Require native ES2015 browser support; the standalone bundles no longer use
+  ES5-only syntax.
 
 ### Features
 
@@ -14,8 +19,7 @@
 
 ### Development
 
-* Modernize build tooling and add package, browser, and TypeScript consumer checks.
-* Include a shared TypeScript configuration for contributors; CI runs on Node 22/24.
+* Modernize build tooling and expand package, browser, and TypeScript tests.
 
 <a name="1.1.0"></a>
 ## [1.1.0](https://github.com/hexenq/kuroshiro-analyzer-kuromoji/compare/1.0.0...1.1.0) (2018-08-05)

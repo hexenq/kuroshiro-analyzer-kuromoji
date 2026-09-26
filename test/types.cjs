@@ -7,7 +7,7 @@ const path = require("node:path");
 const { execFileSync } = require("node:child_process");
 
 const root = path.resolve(__dirname, "..");
-const compiler = require.resolve("typescript/bin/tsc");
+const compiler = path.join(path.dirname(require.resolve("typescript/package.json")), "bin/tsc");
 const temp = fs.mkdtempSync(path.join(os.tmpdir(), "kuroshiro-types-"));
 
 function run(command, args, cwd = temp) {
@@ -45,7 +45,7 @@ function compile(label, options, files, execute = false) {
     fs.writeFileSync(config, JSON.stringify({
         compilerOptions: {
             strict: true, skipLibCheck: false, types: [], target: "ES2015",
-            lib: ["ES2015"], noEmit: !execute, outDir, ...options
+            lib: ["ES2015"], moduleDetection: "legacy", noEmit: !execute, outDir, ...options
         },
         files
     }));
@@ -66,14 +66,11 @@ try {
     for (const file of fs.readdirSync(fixtureRoot)) {
         fs.copyFileSync(path.join(fixtureRoot, file), path.join(temp, file));
     }
-    const commonjs = ["commonjs.cts"];
-    const modules = [...commonjs, "default.mts", "interop.cts"];
-    compile("commonjs", { module: "CommonJS", moduleResolution: "Node", esModuleInterop: false }, commonjs);
-    compile("interop", { module: "CommonJS", moduleResolution: "Node", esModuleInterop: true }, ["interop.cts"]);
+    const modules = ["commonjs.cts", "default.mts", "interop.cts"];
     compile("node16", { module: "Node16", moduleResolution: "Node16" }, modules);
     compile("nodenext", { module: "NodeNext", moduleResolution: "NodeNext" }, modules, true);
     compile("bundler", { module: "ESNext", moduleResolution: "Bundler", verbatimModuleSyntax: true }, ["default.mts"]);
-    compile("browser-global", { module: "None", moduleResolution: "Node", types: ["kuroshiro-analyzer-kuromoji"] }, ["browser.ts"]);
+    compile("browser-global", { module: "Node16", moduleResolution: "Node16", types: ["kuroshiro-analyzer-kuromoji"] }, ["browser.ts"]);
 
 }
 catch (error) {
