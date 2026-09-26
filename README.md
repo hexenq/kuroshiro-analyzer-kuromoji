@@ -51,9 +51,8 @@ const KuromojiAnalyzer = require("kuroshiro-analyzer-kuromoji");
 
 ### TypeScript
 
-The maintained source includes package-entry declarations for the constructor,
-options, and parsed tokens. These declarations are not included in the published
-1.1.0 release.
+Version 1.2.0 includes package-entry declarations for the constructor, options,
+and parsed tokens. Earlier releases do not include these declarations.
 
 ```ts
 import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji";
