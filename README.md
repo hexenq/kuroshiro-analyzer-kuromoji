@@ -15,19 +15,33 @@
     <tr>
         <td rowspan=2>Compatibility</td>
         <td>Node</td>
-        <td>✓ (>=6)</td>
+        <td>22 or later</td>
     </tr>
     <tr>
         <td>Browser</td>
-        <td>✓</td>
+        <td>Native ES2015 support (no Internet Explorer)</td>
     </tr>
 </table>
 
 ## Install
+
 ```sh
-$ npm install kuroshiro-analyzer-kuromoji
+$ npm install kuroshiro-analyzer-kuromoji@beta
 ```
+The stable 1.x release remains available without the `@beta` tag.
+
 For a standalone browser setup, include `dist/kuroshiro-analyzer-kuromoji.min.js` in your page. It exports the global constructor `KuromojiAnalyzer` and includes the tokenizer, but not its dictionary files.
+
+### Migrating from 1.x
+
+Version 2 requires Node.js 22+ or a browser with native ES2015 support, including
+Promises and typed arrays. Browser dictionary loading requires XMLHttpRequest
+with ArrayBuffer responses. Internet Explorer is not supported.
+
+CommonJS constructor imports, ESM default imports, the `KuromojiAnalyzer` browser
+global, and the asynchronous `init()` / `parse()` API remain available. The
+analyzer can be used with kuroshiro 1.x, with the same runtime requirements listed
+above.
 
 ## Usage with kuroshiro
 ### Configure analyzer
@@ -48,6 +62,31 @@ CommonJS is also supported:
 ```js
 const KuromojiAnalyzer = require("kuroshiro-analyzer-kuromoji");
 ```
+
+### TypeScript
+
+The 2.0 prerelease includes package-entry declarations for the constructor,
+options, and parsed tokens. Published 1.x releases do not include these declarations.
+
+```ts
+import KuromojiAnalyzer from "kuroshiro-analyzer-kuromoji";
+
+const options: KuromojiAnalyzer.Options = {};
+const analyzer = new KuromojiAnalyzer(options);
+await analyzer.init();
+const tokens: KuromojiAnalyzer.Token[] = await analyzer.parse("日本語");
+const readings = tokens.map(token => token.reading ?? token.surface_form);
+```
+
+Unknown words may have no `reading` or `pronunciation`. Tokenizer metadata such as
+`word_id` is available under `token.verbose`, not on the token itself.
+
+For TypeScript compiled to CommonJS, use a default import with interop enabled
+(the default in TypeScript 7), or use
+`import KuromojiAnalyzer = require("kuroshiro-analyzer-kuromoji")`.
+Native Node ESM and bundler module resolution also support the default import.
+Non-module browser scripts can reference `kuroshiro-analyzer-kuromoji` types for
+the `KuromojiAnalyzer` global; load the actual UMD script separately.
 
 ### Initialization Parameters
 __Example:__
@@ -78,7 +117,9 @@ The standalone UMD bundles include the browser compatibility code needed by kuro
 
 ## Development
 
-Use Node.js 22.13+ on the 22.x line or Node.js 24+ for development. This requirement applies to the tooling, not to the library's runtime compatibility.
+Use Node.js 22.22.2+ on the 22.x line, 24.15.0+ on the 24.x line, or 26+ for
+development. These stricter requirements come from the development tools; the
+published library's runtime requirement is Node.js 22+.
 
 ```sh
 npm ci
@@ -88,6 +129,18 @@ npm pack --dry-run
 
 Use `npm install <package>` or `npm uninstall <package>` when changing dependencies, and include `package-lock.json` in the change. Builds generate CommonJS files in `lib/` and standalone UMD bundles in `dist/`; `npm pack` rebuilds them automatically.
 
-The test suite covers the analyzer API, package exports, ES2015 output syntax, and real dictionary loading over HTTP in a jsdom browser environment. CI runs on Node.js 22 and 24. Legacy Node.js runtime claims should also be checked on the actual runtime before release; syntax checks alone do not prove runtime compatibility.
+The test suite covers the analyzer API, package exports, ES2015 output syntax,
+and real dictionary loading over HTTP in a jsdom browser environment. CI runs on
+Node.js 22.22.2, 24.15.0, and 26. Browser builds explicitly target ES2015 instead
+of following Vite's default browser targets. Syntax checks and jsdom tests do not
+replace testing in actual browsers.
+
+`npm test` also checks the declarations from the packed package using TypeScript
+7.0.2 in CommonJS, native Node ESM, bundler, and browser-global consumers. It
+rejects invalid options and unsafe access to optional readings, and runs compiled
+Node consumers against the real dictionary. TypeScript is a development dependency.
+The root `tsconfig.json` also provides editor checking without emitting files;
+`npm run test:types` verifies it before checking the packed consumers. No sibling
+repository or editor-specific settings are needed.
 
 Keep development changes backward-compatible and leave version updates to the release process. Write commit messages in English using Conventional Commits, for example `build: modernize development tooling`.
