@@ -73,7 +73,7 @@ try {
     compile("node16", { module: "Node16", moduleResolution: "Node16" }, modules);
     compile("nodenext", { module: "NodeNext", moduleResolution: "NodeNext" }, modules, true);
     compile("bundler", { module: "ESNext", moduleResolution: "Bundler", verbatimModuleSyntax: true }, ["default.mts"]);
-    compile("browser-global", { module: "None", moduleResolution: "Node" }, ["browser.ts"]);
+    compile("browser-global", { module: "None", moduleResolution: "Node", types: ["kuroshiro-analyzer-kuromoji"] }, ["browser.ts"]);
 
 }
 catch (error) {

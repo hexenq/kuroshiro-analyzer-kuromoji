@@ -23,7 +23,7 @@
         "jest:watch": "npm run jest -- --watch",
         "jest:coverage": "jest --verbose --coverage",
         "test:package": "node test/package-smoke.cjs",
-        "test:types": "node test/types.cjs",
+        "test:types": "tsc --project tsconfig.json && node test/types.cjs",
         "test": "npm run lint && npm run jest && npm run build && npm run test:package && npm run test:types",
         "clean": "rimraf lib dist",
         "build": "npm run clean && npm run build:cjs && npm run build:umd && npm run build:umd:min",

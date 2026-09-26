@@ -119,5 +119,8 @@ The test suite covers the analyzer API, package exports, ES2015 output syntax, a
 5.9.3 in CommonJS, native Node ESM, bundler, and browser-global consumers. It
 rejects invalid options and unsafe access to optional readings, and runs compiled
 Node consumers against the real dictionary. TypeScript is a development dependency.
+The root `tsconfig.json` also provides editor checking without emitting files;
+`npm run test:types` verifies it before checking the packed consumers. No sibling
+repository or editor-specific settings are needed.
 
 Keep development changes backward-compatible and leave version updates to the release process. Write commit messages in English using Conventional Commits, for example `build: modernize development tooling`.
