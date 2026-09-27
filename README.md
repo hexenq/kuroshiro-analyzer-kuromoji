@@ -111,7 +111,8 @@ When redistributing dictionary files, include kuromoji's `NOTICE.md` alongside t
 - `/dict/` is relative to the origin root. For a site deployed under `/my-app/`, use `/my-app/dict/` if that is where you serve the files.
 - `dict/` is relative to the current page URL. The browser default, `node_modules/kuromoji/dict/`, only works when your server actually exposes that directory.
 - Serve the files as gzip data. The tokenizer decompresses them itself; do not send `Content-Encoding: gzip` for the stored `.gz` payload unless you intentionally add a separate HTTP compression layer.
-- Check that dictionary requests return the actual files, not a 404 page or an HTML application fallback. Absolute cross-origin URLs are not covered by this setup: the upstream loader uses filesystem-style path joining, which can alter URL schemes.
+- Check that dictionary requests return the actual files, not a 404 page or an HTML application fallback.
+- The standalone bundles also accept an absolute HTTP(S) dictionary URL, such as `dictPath: "https://cdn.example.com/dict/"`, with or without a trailing slash. For cross-origin hosting, the dictionary server must allow your page's origin through CORS (`Access-Control-Allow-Origin`). An HTTPS page needs an HTTPS dictionary URL. Use the `dictPath` option, not `dict`.
 
 The standalone UMD bundles include the browser compatibility code needed by kuromoji. Applications importing the npm source entry through another bundler may need their own Node-module compatibility configuration; this package's Vite build configuration does not configure the consuming application.
 

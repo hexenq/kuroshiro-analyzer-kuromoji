@@ -2,6 +2,23 @@ import path from "node:path";
 import kuromoji from "kuromoji";
 import Analyzer from "../src/index.js";
 import browserDictPath from "../src/dict-path.browser.js";
+import browserPath from "../scripts/browser-path.js";
+
+describe("Browser dictionary URLs", () => {
+    it.each([
+        ["https://cdn.example/dict", "https://cdn.example/dict/base.dat.gz"],
+        ["https://cdn.example/dict/", "https://cdn.example/dict/base.dat.gz"],
+        ["http://cdn.example:8080/app/dict", "http://cdn.example:8080/app/dict/base.dat.gz"],
+        ["//cdn.example/app/dict/", "//cdn.example/app/dict/base.dat.gz"],
+        ["https://cdn.example", "https://cdn.example/base.dat.gz"],
+        ["https://cdn.example/my%20app/dict", "https://cdn.example/my%20app/dict/base.dat.gz"],
+        ["/app/dict/", "/app/dict/base.dat.gz"],
+        ["dict/", "dict/base.dat.gz"],
+        ["../dict", "../dict/base.dat.gz"]
+    ])("joins %s without changing its origin or relative-path meaning", (directory, expected) => {
+        expect(browserPath.join(directory, "base.dat.gz")).toBe(expected);
+    });
+});
 
 describe("Kuromoji analyzer", () => {
     const analyzer = new Analyzer();
