@@ -18,7 +18,10 @@ export default defineConfig(({ mode }) => ({
     }],
     resolve: {
         // The browser dictionary loader needs URL-aware joining, not Node paths.
-        alias: { path: require.resolve("./scripts/browser-path.js") }
+        alias: {
+            path: require.resolve("./scripts/browser-path.js"),
+            "./dict-path.js": require.resolve("./src/dict-path.browser.js")
+        }
     },
     build: {
         // Keep library output usable beyond Vite's default browser targets.
@@ -32,10 +35,8 @@ export default defineConfig(({ mode }) => ({
         lib: {
             entry: "scripts/browser-entry.js",
             name: "KuromojiAnalyzer",
-            formats: ["umd"],
-            fileName: () => mode === "minify"
-                ? "kuroshiro-analyzer-kuromoji.min.js"
-                : "kuroshiro-analyzer-kuromoji.js"
+            formats: mode === "minify" ? ["umd"] : ["es", "umd"],
+            fileName: format => `kuroshiro-analyzer-kuromoji${mode === "minify" ? ".min" : ""}.${format === "es" ? "mjs" : "js"}`
         }
     }
 }));

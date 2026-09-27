@@ -106,15 +106,15 @@ const analyzer = new KuromojiAnalyzer({ dictPath: "/dict/" });
 await kuroshiro.init(analyzer);
 ```
 
-When redistributing dictionary files, include kuromoji's `NOTICE.md` alongside them. Keep the generated `dist/THIRD_PARTY_LICENSES.md` with the standalone bundles as well.
+When redistributing dictionary files, include kuromoji's `NOTICE.md` alongside them. Keep the generated `dist/THIRD_PARTY_LICENSES.md` with the browser bundles as well.
 
 - `/dict/` is relative to the origin root. For a site deployed under `/my-app/`, use `/my-app/dict/` if that is where you serve the files.
 - `dict/` is relative to the current page URL. The browser default, `node_modules/kuromoji/dict/`, only works when your server actually exposes that directory.
 - Serve the files as gzip data. The tokenizer decompresses them itself; do not send `Content-Encoding: gzip` for the stored `.gz` payload unless you intentionally add a separate HTTP compression layer.
 - Check that dictionary requests return the actual files, not a 404 page or an HTML application fallback.
-- The standalone bundles also accept an absolute HTTP(S) dictionary URL, such as `dictPath: "https://cdn.example.com/dict/"`, with or without a trailing slash. For cross-origin hosting, the dictionary server must allow your page's origin through CORS (`Access-Control-Allow-Origin`). An HTTPS page needs an HTTPS dictionary URL. Use the `dictPath` option, not `dict`.
+- The browser analyzer also accepts an absolute HTTP(S) dictionary URL, such as `dictPath: "https://cdn.example.com/dict/"`, with or without a trailing slash. For cross-origin hosting, the dictionary server must allow your page's origin through CORS (`Access-Control-Allow-Origin`). An HTTPS page needs an HTTPS dictionary URL. Use the `dictPath` option, not `dict`.
 
-The standalone UMD bundles include the browser compatibility code needed by kuromoji. Applications importing the npm source entry through another bundler may need their own Node-module compatibility configuration; this package's Vite build configuration does not configure the consuming application.
+Browser bundlers use a prebuilt ESM entry that includes kuromoji's browser compatibility code. Import `kuroshiro-analyzer-kuromoji` normally; no Node-module polyfills or custom bundler aliases are needed. Dictionary files must still be served by your application as described above. In Next.js, initialize and use the browser analyzer in client-side code, such as an event handler or effect.
 
 ## Development
 
@@ -128,10 +128,11 @@ npm test
 npm pack --dry-run
 ```
 
-Use `npm install <package>` or `npm uninstall <package>` when changing dependencies, and include `package-lock.json` in the change. Builds generate CommonJS files in `lib/` and standalone UMD bundles in `dist/`; `npm pack` rebuilds them automatically.
+Use `npm install <package>` or `npm uninstall <package>` when changing dependencies, and include `package-lock.json` in the change. Builds generate CommonJS files in `lib/`, and browser ESM and standalone UMD bundles in `dist/`; `npm pack` rebuilds them automatically.
 
 The test suite covers the analyzer API, package exports, ES2015 output syntax,
-and real dictionary loading over HTTP in a jsdom browser environment. CI runs on
+and real dictionary loading over HTTP in a jsdom browser environment, including
+a Vite consumer of the packed package. CI runs on
 Node.js 22.22.2, 24.15.0, and 26. Browser builds explicitly target ES2015 instead
 of following Vite's default browser targets. Syntax checks and jsdom tests do not
 replace testing in actual browsers.

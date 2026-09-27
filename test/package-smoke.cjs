@@ -3,11 +3,13 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const http = require("node:http");
+const os = require("node:os");
 const path = require("node:path");
 const vm = require("node:vm");
 const { pathToFileURL } = require("node:url");
 const { JSDOM, VirtualConsole } = require("jsdom");
 const acorn = require("acorn");
+const installPackedPackage = require("./packed-package.cjs");
 
 const root = path.resolve(__dirname, "..");
 const dictionary = path.resolve(path.dirname(require.resolve("kuromoji")), "../dict");
@@ -68,7 +70,40 @@ async function main() {
     for (const filename of ["kuroshiro-analyzer-kuromoji.js", "kuroshiro-analyzer-kuromoji.min.js"]) {
         await testBrowserBundle(filename, expected);
     }
+    await testBundlerImport(expected);
     console.log("CommonJS, native ESM and browser package smoke tests passed");
+}
+
+async function testBundlerImport(expected) {
+    const temp = fs.mkdtempSync(path.join(os.tmpdir(), "kuromoji-browser-import-"));
+    try {
+        const metadata = installPackedPackage(root, temp);
+        const entry = path.join(temp, "node_modules", metadata.name, metadata.browser);
+        acorn.parse(fs.readFileSync(entry, "utf8"), { ecmaVersion: 2015, sourceType: "module" });
+        assertConstructor((await import(pathToFileURL(entry))).default);
+
+        // Use a normal consumer import, without our library's Vite plugins or aliases.
+        const source = path.join(temp, "entry.js");
+        fs.writeFileSync(source, `export { default } from "${metadata.name}";`);
+        const { build } = await import("vite");
+        const bundle = await build({
+            configFile: false, root: temp, publicDir: false, logLevel: "silent",
+            build: {
+                target: "es2015", write: false, minify: false,
+                lib: { entry: source, formats: ["iife"], name: "KuromojiAnalyzer" }
+            }
+        });
+        const outputs = Array.isArray(bundle) ? bundle : [bundle];
+        const code = outputs.flatMap(output => output.output).find(file => file.type === "chunk").code;
+        acorn.parse(code, { ecmaVersion: 2015 });
+        // UMD tests cover the URL matrix; this case checks the consumer entry,
+        // decompression, token output, missing files and CORS rejection together.
+        await testAbsoluteDictionaryUrl(`${code}\nwindow.KuromojiAnalyzer = KuromojiAnalyzer;`, expected, "cross-origin", "");
+        console.log("Packed browser ESM import: consumer build and real HTTP dictionary loading passed");
+    }
+    finally {
+        fs.rmSync(temp, { recursive: true, force: true });
+    }
 }
 
 async function createDictionaryServer({ cors = false } = {}) {
@@ -142,45 +177,45 @@ async function testBrowserBundle(filename, expected) {
             await new Promise(resolve => server.close(resolve));
         }
     }
-    await testAbsoluteDictionaryUrls(code, expected);
+    for (const kind of ["same-origin", "cross-origin", "protocol-relative"]) {
+        for (const suffix of ["", "/"]) {
+            await testAbsoluteDictionaryUrl(code, expected, kind, suffix);
+        }
+    }
     console.log(`${filename}: exports, ES2015 syntax and real HTTP dictionary loading passed`);
 }
 
-async function testAbsoluteDictionaryUrls(code, expected) {
-    for (const kind of ["same-origin", "cross-origin", "protocol-relative"]) {
-        const crossOrigin = kind !== "same-origin";
-        for (const suffix of ["", "/"]) {
-            const { server, origin, requests } = await createDictionaryServer({ cors: crossOrigin });
-            let dom;
-            try {
-                const pageOrigin = crossOrigin ? "http://localhost" : origin;
-                const errors = [];
-                const virtualConsole = new VirtualConsole();
-                virtualConsole.on("jsdomError", error => errors.push(error));
-                dom = new JSDOM("", { url: `${pageOrigin}/nested/page.html`, runScripts: "outside-only", virtualConsole });
-                dom.window.eval(code);
-                const base = kind === "protocol-relative" ? origin.replace(/^http:/, "") : origin;
-                const analyzer = new dom.window.KuromojiAnalyzer({ dictPath: `${base}/nested/dict${suffix}` });
-                await withTimeout(analyzer.init());
-                assert.ok(requests.length > 0, `Expected dictionary requests for ${kind}`);
-                assert.ok(requests.every(url => url.startsWith("/nested/dict/")), `Wrong URL for ${kind}`);
-                assert.deepEqual(JSON.parse(JSON.stringify(await analyzer.parse(sentence))), expected);
-                assert.deepEqual(errors, []);
+async function testAbsoluteDictionaryUrl(code, expected, kind, suffix) {
+    const crossOrigin = kind !== "same-origin";
+    const { server, origin, requests } = await createDictionaryServer({ cors: crossOrigin });
+    let dom;
+    try {
+        const pageOrigin = crossOrigin ? "http://localhost" : origin;
+        const errors = [];
+        const virtualConsole = new VirtualConsole();
+        virtualConsole.on("jsdomError", error => errors.push(error));
+        dom = new JSDOM("", { url: `${pageOrigin}/nested/page.html`, runScripts: "outside-only", virtualConsole });
+        dom.window.eval(code);
+        const base = kind === "protocol-relative" ? origin.replace(/^http:/, "") : origin;
+        const analyzer = new dom.window.KuromojiAnalyzer({ dictPath: `${base}/nested/dict${suffix}` });
+        await withTimeout(analyzer.init());
+        assert.ok(requests.length > 0, `Expected dictionary requests for ${kind}`);
+        assert.ok(requests.every(url => url.startsWith("/nested/dict/")), `Wrong URL for ${kind}`);
+        assert.deepEqual(JSON.parse(JSON.stringify(await analyzer.parse(sentence))), expected);
+        assert.deepEqual(errors, []);
 
-                const missing = new dom.window.KuromojiAnalyzer({ dictPath: `${base}/missing/` });
-                await withTimeout(assert.rejects(missing.init()));
-                if (crossOrigin) {
-                    // This endpoint serves dictionary bytes without allowing this origin.
-                    const blocked = new dom.window.KuromojiAnalyzer({ dictPath: `${base}/blocked/` });
-                    await withTimeout(assert.rejects(blocked.init()));
-                    assert.ok(requests.includes("/blocked/base.dat.gz"));
-                }
-            }
-            finally {
-                if (dom) dom.window.close();
-                await new Promise(resolve => server.close(resolve));
-            }
+        const missing = new dom.window.KuromojiAnalyzer({ dictPath: `${base}/missing/` });
+        await withTimeout(assert.rejects(missing.init()));
+        if (crossOrigin) {
+            // This endpoint serves dictionary bytes without allowing this origin.
+            const blocked = new dom.window.KuromojiAnalyzer({ dictPath: `${base}/blocked/` });
+            await withTimeout(assert.rejects(blocked.init()));
+            assert.ok(requests.includes("/blocked/base.dat.gz"));
         }
+    }
+    finally {
+        if (dom) dom.window.close();
+        await new Promise(resolve => server.close(resolve));
     }
 }
 
