@@ -3,8 +3,10 @@
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const http = require("node:http");
+const os = require("node:os");
 const path = require("node:path");
 const vm = require("node:vm");
+const { execFileSync } = require("node:child_process");
 const { pathToFileURL } = require("node:url");
 const { JSDOM, VirtualConsole } = require("jsdom");
 const acorn = require("acorn");
@@ -68,7 +70,55 @@ async function main() {
     for (const filename of ["kuroshiro-analyzer-kuromoji.js", "kuroshiro-analyzer-kuromoji.min.js"]) {
         await testBrowserBundle(filename, expected);
     }
+    await testBundlerImport(expected);
     console.log("CommonJS, native ESM and browser package smoke tests passed");
+}
+
+async function testBundlerImport(expected) {
+    const metadata = require("../package.json");
+    const entry = path.join(root, metadata.browser);
+    acorn.parse(fs.readFileSync(entry, "utf8"), { ecmaVersion: 2015, sourceType: "module" });
+    assertConstructor((await import(pathToFileURL(entry))).default);
+
+    const temp = fs.mkdtempSync(path.join(os.tmpdir(), "kuromoji-browser-import-"));
+    try {
+        // Resolve a bare import from the published files, without consumer aliases
+        // or our library's Vite plugins. Build first through npm test.
+        const output = execFileSync(process.execPath, [
+            process.env.npm_execpath, "pack", "--ignore-scripts", "--json",
+            "--pack-destination", temp, "--cache", path.join(temp, "cache")
+        ], { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+        const packed = JSON.parse(output);
+        const result = Array.isArray(packed) ? packed[0] : packed[metadata.name];
+        assert.ok(result.files.some(file => file.path === metadata.browser));
+        const destination = path.join(temp, "node_modules", metadata.name);
+        fs.mkdirSync(destination, { recursive: true });
+        execFileSync("tar", ["-xzf", path.join(temp, result.filename), "--strip-components=1", "-C", destination]);
+        for (const dependency of Object.keys(metadata.dependencies)) {
+            fs.symlinkSync(path.dirname(require.resolve(`${dependency}/package.json`)),
+                path.join(temp, "node_modules", dependency), "junction");
+        }
+        const source = path.join(temp, "entry.js");
+        fs.writeFileSync(source, `export { default } from "${metadata.name}";`);
+        const { build } = await import("vite");
+        const bundle = await build({
+            configFile: false, root: temp, publicDir: false, logLevel: "silent",
+            build: {
+                target: "es2015", write: false, minify: false,
+                lib: { entry: source, formats: ["iife"], name: "KuromojiAnalyzer" }
+            }
+        });
+        const outputs = Array.isArray(bundle) ? bundle : [bundle];
+        const code = outputs.flatMap(output => output.output).find(file => file.type === "chunk").code;
+        acorn.parse(code, { ecmaVersion: 2015 });
+        // Exercise the consumer's output with real compressed dictionaries,
+        // including cross-origin URLs, CORS rejection and missing files.
+        await testAbsoluteDictionaryUrls(`${code}\nwindow.KuromojiAnalyzer = KuromojiAnalyzer;`, expected);
+        console.log("Packed browser ESM import: consumer build and real HTTP dictionary loading passed");
+    }
+    finally {
+        fs.rmSync(temp, { recursive: true, force: true });
+    }
 }
 
 async function createDictionaryServer({ cors = false } = {}) {
