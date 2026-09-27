@@ -23,11 +23,10 @@
         "test:types": "tsc --project tsconfig.json && node test/types.cjs",
         "test": "npm run lint && npm run jest && npm run build && npm run test:package && npm run test:types",
         "clean": "rimraf lib dist",
-        "build": "npm run clean && npm run build:cjs && npm run build:browser && npm run build:umd && npm run build:umd:min",
+        "build": "npm run clean && npm run build:cjs && npm run build:browser && npm run build:browser:min",
         "build:cjs": "cross-env BABEL_ENV=cjs babel src --out-dir lib",
-        "build:browser": "vite build --mode browser",
-        "build:umd": "vite build",
-        "build:umd:min": "vite build --mode minify",
+        "build:browser": "vite build",
+        "build:browser:min": "vite build --mode minify",
         "prepack": "npm run build"
     },
     "keywords": [

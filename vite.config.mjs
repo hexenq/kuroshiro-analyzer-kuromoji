@@ -35,12 +35,8 @@ export default defineConfig(({ mode }) => ({
         lib: {
             entry: "scripts/browser-entry.js",
             name: "KuromojiAnalyzer",
-            formats: [mode === "browser" ? "es" : "umd"],
-            fileName: () => mode === "browser"
-                ? "kuroshiro-analyzer-kuromoji.mjs"
-                : mode === "minify"
-                ? "kuroshiro-analyzer-kuromoji.min.js"
-                : "kuroshiro-analyzer-kuromoji.js"
+            formats: mode === "minify" ? ["umd"] : ["es", "umd"],
+            fileName: format => `kuroshiro-analyzer-kuromoji${mode === "minify" ? ".min" : ""}.${format === "es" ? "mjs" : "js"}`
         }
     }
 }));
