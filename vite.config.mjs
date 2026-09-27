@@ -17,8 +17,8 @@ export default defineConfig(({ mode }) => ({
         }
     }],
     resolve: {
-        // kuromoji's browser dictionary loader still imports Node's path module.
-        alias: { path: require.resolve("path-browserify") }
+        // The browser dictionary loader needs URL-aware joining, not Node paths.
+        alias: { path: require.resolve("./scripts/browser-path.js") }
     },
     build: {
         // Keep library output usable beyond Vite's default browser targets.
