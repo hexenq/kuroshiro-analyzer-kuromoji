@@ -1,3 +1,12 @@
+<a name="2.0.0-beta.2"></a>
+## [2.0.0-beta.2](https://github.com/hexenq/kuroshiro-analyzer-kuromoji/compare/2.0.0-beta.1...2.0.0-beta.2) (2026-09-28)
+
+### Fixes
+
+* Preserve HTTP(S) and protocol-relative dictionary URLs in browser builds (#10).
+* Fix browser imports in bundlers such as Vite and Next.js with a bundled ESM
+  entry (#8, #11).
+
 <a name="2.0.0-beta.1"></a>
 ## [2.0.0-beta.1](https://github.com/hexenq/kuroshiro-analyzer-kuromoji/compare/1.1.0...2.0.0-beta.1) (2026-09-26)
 
