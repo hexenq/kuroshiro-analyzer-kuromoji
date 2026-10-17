@@ -1,3 +1,12 @@
+<a name="2.0.0-beta.3"></a>
+## [2.0.0-beta.3](https://github.com/hexenq/kuroshiro-analyzer-kuromoji/compare/2.0.0-beta.2...2.0.0-beta.3) (2026-10-17)
+
+### Fixes
+
+* Fix uncaught errors and hanging `init()` calls when dictionary loading or
+  assembly fails.
+* Include dictionary URLs and HTTP status codes in browser loading errors.
+
 <a name="2.0.0-beta.2"></a>
 ## [2.0.0-beta.2](https://github.com/hexenq/kuroshiro-analyzer-kuromoji/compare/2.0.0-beta.1...2.0.0-beta.2) (2026-09-28)
 
