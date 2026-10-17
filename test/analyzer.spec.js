@@ -1,5 +1,5 @@
 import path from "node:path";
-import kuromoji from "kuromoji";
+import NodeDictionaryLoader from "kuromoji/src/loader/NodeDictionaryLoader.js";
 import Analyzer from "../src/index.js";
 import browserDictPath from "../src/dict-path.browser.js";
 import browserPath from "../scripts/browser-path.js";
@@ -54,17 +54,38 @@ describe("Kuromoji analyzer", () => {
 
     it("can retry after a failed initialization", async () => {
         const retry = new Analyzer();
-        const build = jest.spyOn(kuromoji, "builder").mockReturnValueOnce({
-            build: callback => callback(new Error("temporary failure"))
-        });
+        const load = jest.spyOn(NodeDictionaryLoader.prototype, "load")
+            .mockImplementationOnce(callback => callback(new Error("temporary failure")));
         try {
             await expect(retry.init()).rejects.toThrow("temporary failure");
         }
         finally {
-            build.mockRestore();
+            load.mockRestore();
         }
         await retry.init();
         expect(await retry.parse("日本語")).toHaveLength(1);
+    });
+
+    it("does not call an assembly callback twice when it throws", async () => {
+        const cause = new RangeError("Invalid dictionary data");
+        const assemble = jest.fn(() => { throw cause; });
+        const load = jest.spyOn(NodeDictionaryLoader.prototype, "load").mockImplementationOnce(function () {
+            this.loadArrayBuffer("dict/base.dat.gz", assemble);
+        });
+        const read = jest.spyOn(NodeDictionaryLoader.prototype, "loadArrayBuffer")
+            .mockImplementationOnce((_url, callback) => {
+                queueMicrotask(() => callback(null, new ArrayBuffer(1)));
+            });
+        try {
+            await expect(new Analyzer().init()).rejects.toMatchObject({
+                message: expect.stringContaining("Failed to assemble dictionary"), cause
+            });
+            expect(assemble).toHaveBeenCalledTimes(1);
+        }
+        finally {
+            read.mockRestore();
+            load.mockRestore();
+        }
     });
 
     it("preserves linguistic fields and nests tokenizer metadata in verbose", async () => {

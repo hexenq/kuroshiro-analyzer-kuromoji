@@ -20,6 +20,7 @@ export default defineConfig(({ mode }) => ({
         // The browser dictionary loader needs URL-aware joining, not Node paths.
         alias: {
             path: require.resolve("./scripts/browser-path.js"),
+            "kuromoji/src/loader/NodeDictionaryLoader.js": require.resolve("./scripts/browser-dictionary-loader.cjs"),
             "./dict-path.js": require.resolve("./src/dict-path.browser.js")
         }
     },

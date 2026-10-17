@@ -6,6 +6,7 @@ const http = require("node:http");
 const os = require("node:os");
 const path = require("node:path");
 const vm = require("node:vm");
+const { gzipSync, gunzipSync } = require("node:zlib");
 const { pathToFileURL } = require("node:url");
 const { JSDOM, VirtualConsole } = require("jsdom");
 const acorn = require("acorn");
@@ -14,6 +15,19 @@ const installPackedPackage = require("./packed-package.cjs");
 const root = path.resolve(__dirname, "..");
 const dictionary = path.resolve(path.dirname(require.resolve("kuromoji")), "../dict");
 const sentence = "すもももももも。日本語を学ぶ。";
+const invalidDictionaryFiles = [
+    ["base.dat.gz"],
+    ["cc.dat.gz"],
+    ["unk_compat.dat.gz"],
+    ["base.dat.gz", "cc.dat.gz"]
+];
+
+function assertAssemblyError(error, directory, ErrorType, RangeErrorType) {
+    assert.ok(error instanceof ErrorType);
+    assert.ok(error.message.includes(directory));
+    assert.match(error.message, /assemble dictionary/i);
+    assert.ok(error.cause instanceof RangeErrorType);
+}
 
 function assertConstructor(Analyzer) {
     assert.equal(typeof Analyzer, "function");
@@ -62,8 +76,9 @@ async function main() {
     const expected = await analyzer.parse(sentence);
     assert.ok(expected.length > 0);
     assert.ok(expected.every(token => token.verbose && !Object.hasOwn(token, "word_id")));
+    await testNodeDictionaryAssembly(Analyzer);
 
-    for (const file of ["index.js", "lib/index.js", "lib/dict-path.js", "lib/dict-path.browser.js"]) {
+    for (const file of ["index.js", "lib/index.js", "lib/build-tokenizer.js", "lib/dict-path.js", "lib/dict-path.browser.js"]) {
         acorn.parse(fs.readFileSync(path.join(root, file), "utf8"), { ecmaVersion: 2015 });
     }
 
@@ -96,9 +111,12 @@ async function testBundlerImport(expected) {
         const outputs = Array.isArray(bundle) ? bundle : [bundle];
         const code = outputs.flatMap(output => output.output).find(file => file.type === "chunk").code;
         acorn.parse(code, { ecmaVersion: 2015 });
+        const browserCode = `${code}\nwindow.KuromojiAnalyzer = KuromojiAnalyzer;`;
         // UMD tests cover the URL matrix; this case checks the consumer entry,
         // decompression, token output, missing files and CORS rejection together.
-        await testAbsoluteDictionaryUrl(`${code}\nwindow.KuromojiAnalyzer = KuromojiAnalyzer;`, expected, "cross-origin", "");
+        await testAbsoluteDictionaryUrl(browserCode, expected, "cross-origin", "");
+        await testDictionaryErrors(browserCode);
+        await testDictionaryAssembly(browserCode);
         console.log("Packed browser ESM import: consumer build and real HTTP dictionary loading passed");
     }
     finally {
@@ -106,7 +124,7 @@ async function testBundlerImport(expected) {
     }
 }
 
-async function createDictionaryServer({ cors = false } = {}) {
+async function createDictionaryServer({ cors = false, payload = "gzip", invalidFiles = [] } = {}) {
     const requests = [];
     const server = http.createServer((request, response) => {
         const url = new URL(request.url, "http://localhost");
@@ -122,19 +140,33 @@ async function createDictionaryServer({ cors = false } = {}) {
             response.end("Not found");
             return;
         }
-        // Send raw gzip bytes: kuromoji itself performs decompression.
-        const bytes = fs.readFileSync(path.join(dictionary, filename));
+        // Normally send raw gzip bytes: kuromoji itself performs decompression.
+        let bytes = fs.readFileSync(path.join(dictionary, filename));
+        if (filename === "base.dat.gz") {
+            if (payload === "empty-response") bytes = Buffer.alloc(0);
+            if (payload === "empty-dictionary") bytes = gzipSync(Buffer.alloc(0));
+        }
+        if (payload === "html") bytes = Buffer.from("<!doctype html><title>Application fallback</title>");
+        if (payload === "truncated") bytes = bytes.subarray(0, 64);
+        if (payload === "decoded") bytes = gunzipSync(bytes);
+        if (payload === "double-gzip") bytes = gzipSync(bytes);
+        if (invalidFiles.includes(filename)) bytes = gzipSync(Buffer.from([1]));
+        if (payload === "http-gzip" || payload === "double-gzip") {
+            response.setHeader("Content-Encoding", "gzip");
+        }
         response.writeHead(200, { "Content-Type": "application/octet-stream" });
         response.end(bytes);
     });
     await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
     const origin = `http://127.0.0.1:${server.address().port}`;
-    return { server, origin, requests };
+    return { server, origin, requests, repair: () => { invalidFiles = []; } };
 }
 
 async function testBrowserBundle(filename, expected) {
     const code = fs.readFileSync(path.join(root, "dist", filename), "utf8");
     acorn.parse(code, { ecmaVersion: 2015 });
+    await testDictionaryErrors(code);
+    await testDictionaryAssembly(code);
 
     const commonjs = { module: { exports: {} }, exports: {} };
     vm.runInNewContext(code, commonjs);
@@ -205,17 +237,117 @@ async function testAbsoluteDictionaryUrl(code, expected, kind, suffix) {
         assert.deepEqual(errors, []);
 
         const missing = new dom.window.KuromojiAnalyzer({ dictPath: `${base}/missing/` });
-        await withTimeout(assert.rejects(missing.init()));
+        await withTimeout(assert.rejects(missing.init(), error => {
+            assert.ok(error instanceof dom.window.Error);
+            assert.ok(error.message.includes(`${base}/missing/`));
+            assert.match(error.message, /HTTP 404/);
+            return true;
+        }));
         if (crossOrigin) {
             // This endpoint serves dictionary bytes without allowing this origin.
             const blocked = new dom.window.KuromojiAnalyzer({ dictPath: `${base}/blocked/` });
-            await withTimeout(assert.rejects(blocked.init()));
+            await withTimeout(assert.rejects(blocked.init(), error => {
+                assert.ok(error instanceof dom.window.Error);
+                assert.ok(error.message.includes(`${base}/blocked/`));
+                assert.match(error.message, /network error/i);
+                return true;
+            }));
             assert.ok(requests.includes("/blocked/base.dat.gz"));
         }
     }
     finally {
         if (dom) dom.window.close();
         await new Promise(resolve => server.close(resolve));
+    }
+}
+
+async function testDictionaryErrors(code) {
+    for (const payload of ["empty-response", "empty-dictionary", "html", "truncated", "decoded", "http-gzip", "double-gzip"]) {
+        const { server, origin } = await createDictionaryServer({ payload });
+        const errors = [];
+        const virtualConsole = new VirtualConsole();
+        virtualConsole.on("jsdomError", error => errors.push(error));
+        const dom = new JSDOM("", { url: origin, runScripts: "outside-only", virtualConsole });
+        try {
+            dom.window.eval(code);
+            const analyzer = new dom.window.KuromojiAnalyzer({ dictPath: `${origin}/dict/` });
+            if (payload === "double-gzip") {
+                // HTTP decoding removes only the extra outer layer; valid gzip remains.
+                await withTimeout(analyzer.init());
+                assert.equal((await analyzer.parse("日本語"))[0].reading, "ニホンゴ");
+            }
+            else {
+                // Keep the timeout outside assert.rejects: a hung init is not a rejection.
+                await withTimeout(assert.rejects(analyzer.init(), error => {
+                    assert.ok(error instanceof dom.window.Error, payload);
+                    assert.ok(error.message.includes(`${origin}/dict/`), payload);
+                    assert.match(error.message, /HTTP 200/);
+                    if (payload === "empty-response" || payload === "empty-dictionary") {
+                        assert.ok(error.message.includes("/dict/base.dat.gz"));
+                        assert.match(error.message, payload === "empty-response"
+                            ? /empty dictionary response/i : /dictionary is empty after decompression/i);
+                    }
+                    else {
+                        assert.match(error.message, /decompress/i);
+                        assert.ok(error.cause instanceof dom.window.Error, payload);
+                    }
+                    return true;
+                }));
+            }
+            assert.deepEqual(errors, [], `Uncaught browser errors for ${payload}`);
+        }
+        finally {
+            dom.window.close();
+            await new Promise(resolve => server.close(resolve));
+        }
+    }
+}
+
+async function testNodeDictionaryAssembly(Analyzer) {
+    const temp = fs.mkdtempSync(path.join(os.tmpdir(), "kuromoji-invalid-dictionary-"));
+    try {
+        fs.cpSync(dictionary, temp, { recursive: true });
+        for (const files of invalidDictionaryFiles) {
+            for (const file of files) fs.writeFileSync(path.join(temp, file), gzipSync(Buffer.from([1])));
+            const analyzer = new Analyzer({ dictPath: temp });
+            await withTimeout(assert.rejects(analyzer.init(), error => {
+                assertAssemblyError(error, temp, Error, RangeError);
+                return true;
+            }));
+            for (const file of files) fs.copyFileSync(path.join(dictionary, file), path.join(temp, file));
+            await withTimeout(analyzer.init());
+            assert.equal((await analyzer.parse("日本語"))[0].reading, "ニホンゴ");
+        }
+    }
+    finally {
+        fs.rmSync(temp, { recursive: true, force: true });
+    }
+}
+
+async function testDictionaryAssembly(code) {
+    for (const invalidFiles of invalidDictionaryFiles) {
+        const { server, origin, repair } = await createDictionaryServer({ invalidFiles });
+        const errors = [];
+        const virtualConsole = new VirtualConsole();
+        virtualConsole.on("jsdomError", error => errors.push(error));
+        const dom = new JSDOM("", { url: origin, runScripts: "outside-only", virtualConsole });
+        try {
+            dom.window.eval(code);
+            const directory = `${origin}/dict/`;
+            const analyzer = new dom.window.KuromojiAnalyzer({ dictPath: directory });
+            await withTimeout(assert.rejects(analyzer.init(), error => {
+                assertAssemblyError(error, directory, dom.window.Error, dom.window.RangeError);
+                return true;
+            }));
+            repair();
+            await withTimeout(analyzer.init());
+            assert.equal((await analyzer.parse("日本語"))[0].reading, "ニホンゴ");
+            assert.deepEqual(errors, [], `Uncaught browser errors for ${invalidFiles.join(", ")}`);
+        }
+        finally {
+            dom.window.close();
+            await new Promise(resolve => server.close(resolve));
+        }
     }
 }
 

@@ -1,4 +1,4 @@
-import kuromoji from "kuromoji";
+import buildTokenizer from "./build-tokenizer.js";
 import defaultDictPath from "./dict-path.js";
 
 /**
@@ -26,20 +26,11 @@ class Analyzer {
      * @returns {Promise} Promise object represents the result of initialization
      */
     init() {
-        return new Promise((resolve, reject) => {
-            const self = this;
-            if (this._analyzer == null) {
-                kuromoji.builder({ dicPath: this._dictPath }).build((err, newAnalyzer) => {
-                    if (err) {
-                        return reject(err);
-                    }
-                    self._analyzer = newAnalyzer;
-                    resolve();
-                });
-            }
-            else {
-                reject(new Error("This analyzer has already been initialized."));
-            }
+        if (this._analyzer != null) {
+            return Promise.reject(new Error("This analyzer has already been initialized."));
+        }
+        return buildTokenizer(this._dictPath).then(analyzer => {
+            this._analyzer = analyzer;
         });
     }
 
